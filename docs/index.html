@@ -2,60 +2,261 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shapechanger</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>shapechanger - Conversor de Coordenadas</title>
+  <meta name="description" content="Conversor de coordenadas geográficas: DMS, Decimal e UTM. Processamento em lote e exportação para CSV." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Ajustes simples para botoes e elementos visuais */
+    .btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+      margin: 5px 0;
+    }
+    .btn:hover {
+      background: #333;
+    }
+    .btn-secondary {
+      background: #555;
+    }
+    .btn-secondary:hover {
+      background: #222;
+    }
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+      color: #000;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 15px;
+      border: 1px solid #000;
+      border-radius: 5px;
+      background: #fff;
+      color: #000;
+      font-size: 1em;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+    }
+    /* Tabela */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      color: #000;
+    }
+    .results-table th, .results-table td {
+      border: 1px solid #000;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .results-table th {
+      background: #f0f0f0;
+      font-weight: 700;
+    }
+    /* Container & layout */
+    body {
+      background: #fff;
+      color: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-weight: 900;
+      margin: 0 0 8px;
+      font-size: 2.2em;
+      color: #000;
+    }
+    .header p {
+      margin: 0;
+      font-size: 1.1em;
+      color: #222;
+    }
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #000;
+    }
+    .section {
+      background: #fff;
+      padding: 15px 20px;
+      border: 1px solid #000;
+      border-radius: 8px;
+      box-shadow: none;
+    }
+    /* Informação sobre fusos */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      font-size: 0.9em;
+      color: #000;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>shapechanger</h1>
-      <p>Coordinate Converter</p>
+      <p>Conversor de Coordenadas Geográficas</p>
     </div>
+    
     <div class="content">
-      <div class="converter">
-        <div class="section">
-          <h2 class="section-title">Entrada</h2>
-          <div class="form-group">
-            <label for="inputFormat">Formato de Entrada:</label>
-            <select id="inputFormat"></select>
-          </div>
-          <div id="fieldsContainer"></div>
+      <!-- Seção de Conversão Individual -->
+      <div class="converter section">
+        <h2 class="section-title">📍 Entrada</h2>
+        <label for="inputFormat">Formato de Entrada:</label>
+        <select id="inputFormat">
+          <option value="">Selecione o formato...</option>
+        </select>
+
+        <div id="fieldsContainer"></div>
+        
+        <div style="text-align: center;">
+          <button class="btn btn-convert" id="convertBtn">🔄 Converter</button>
         </div>
-        <div class="section convert-section">
-          <button class="btn btn-convert" id="convertBtn">Converter</button>
-        </div>
-        <div class="section">
-          <h2 class="section-title">Saída</h2>
-          <div class="form-group">
-            <label for="outputFormat">Formato de Saída:</label>
-            <select id="outputFormat"></select>
-          </div>
-          <div id="result"></div>
-          <button id="addBtn" class="btn btn-secondary" hidden>Adicionar à Tabela</button>
+        
+        <h2 class="section-title" style="margin-top: 30px;">📤 Saída</h2>
+        <label for="outputFormat">Formato de Saída:</label>
+        <select id="outputFormat">
+          <option value="">Selecione o formato...</option>
+        </select>
+
+        <div id="result" style="min-height: 3em; margin-top: 10px;"></div>
+
+        <button id="addBtn" class="btn btn-secondary" hidden>➕ Adicionar à Tabela</button>
+      </div>
+      
+      <!-- Seção de Processamento em Lote -->
+      <div class="bulk-input section">
+        <h2 class="section-title">📊 Processamento em Lote</h2>
+        <label for="bulkInput">
+          Dados para Processamento (uma coordenada por linha):
+          <small style="display: block; font-weight: normal; color: #444; margin-top: 4px;">
+            Formatos aceitos:<br>
+            • <code>Latitude, Longitude</code><br>
+            • <code>Área, Ponto, Latitude, Longitude</code><br>
+            • Coordenadas em formato DMS (25°30'45"S) ou Decimal (-25.5125)
+          </small>
+        </label>
+        <textarea 
+          id="bulkInput" 
+          rows="8" 
+          placeholder="Exemplo:
+-25.7583, -48.5125
+Área 1, Ponto 1, 25°45'30&quot;S, 48°30'45&quot;W
+Área 2, Ponto 2, -25.7583, -48.5125"></textarea>
+        
+        <div style="text-align: center;">
+          <button class="btn" id="batchBtn">🔄 Processar Lote</button>
+          <button class="btn btn-secondary" id="exportBtn">📥 Exportar CSV</button>
         </div>
       </div>
-
-      <div class="section bulk-input">
-        <h2 class="section-title">Processamento em Lote</h2>
-        <textarea id="bulkInput" rows="6" placeholder="Área,Ponto,Lat,Lon ou Lat,Lon (uma por linha)"></textarea>
-        <button class="btn" id="batchBtn">Processar Lote</button>
-        <button class="btn btn-secondary" id="exportBtn">Exportar CSV</button>
-      </div>
-
-      <div id="tableContainer" class="section" hidden>
-        <h2 class="section-title">Tabela de Resultados</h2>
+    </div>
+    
+    <!-- Tabela de Resultados -->
+    <div id="tableContainer" class="section" hidden>
+      <h2 class="section-title">📋 Tabela de Resultados</h2>
+      <div style="overflow-x: auto;">
         <table class="results-table" id="resultsTable">
-          <thead><tr><th>Área</th><th>Ponto</th><th>Lat (DMS)</th><th>Lon (DMS)</th><th>Lat (Dec)</th><th>Lon (Dec)</th><th>Easting</th><th>Northing</th><th>Zona</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Área</th>
+              <th>Ponto</th>
+              <th>Latitude (DMS)</th>
+              <th>Longitude (DMS)</th>
+              <th>Latitude (Decimal)</th>
+              <th>Longitude (Decimal)</th>
+              <th>Easting (m)</th>
+              <th>Northing (m)</th>
+              <th>Fuso UTM</th>
+            </tr>
+          </thead>
           <tbody></tbody>
         </table>
+      </div>
+      <div style="margin-top: 15px; text-align: center;">
+        <button class="btn btn-secondary" onclick="document.querySelector('#resultsTable tbody').innerHTML = ''; document.getElementById('tableContainer').hidden = true;">
+          🗑️ Limpar Tabela
+        </button>
+      </div>
+    </div>
+    
+    <!-- Informações sobre Fusos UTM -->
+    <div class="section" style="margin-top: 20px;">
+      <h2 class="section-title">ℹ️ Informações sobre Fusos UTM no Brasil</h2>
+      <div class="info-grid">
+        <div>
+          <strong>Fuso 18S:</strong> Acre (oeste)<br>
+          <strong>Fuso 19S:</strong> Acre (leste), Rondônia<br>
+          <strong>Fuso 20S:</strong> Amazonas (oeste)<br>
+          <strong>Fuso 21S:</strong> Amazonas (centro/leste), Roraima, Pará (oeste)
+        </div>
+        <div>
+          <strong>Fuso 22S:</strong> Pará (centro/leste), Amapá, Maranhão, Tocantins<br>
+          <strong>Fuso 23S:</strong> Ceará, Rio Grande do Norte, Paraíba, Pernambuco, Alagoas, Sergipe<br>
+          <strong>Fuso 24S:</strong> Bahia (leste), Minas Gerais, Espírito Santo, Rio de Janeiro, São Paulo, Paraná<br>
+          <strong>Fuso 25S:</strong> Santa Catarina (leste), Rio Grande do Sul, Fernando de Noronha
+        </div>
       </div>
     </div>
   </div>
   
-<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
-<script src="CoordUtils.js"></script>
-<script src="main.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+  <script src="CoordUtils.js"></script>
+  <script src="main.js"></script>
   
+  <script>
+    // Feedback visual de carregamento simples para botões
+    document.addEventListener('DOMContentLoaded', () => {
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!btn.classList.contains('btn-secondary')) {
+            btn.classList.add('loading');
+            setTimeout(() => btn.classList.remove('loading'), 1000);
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
