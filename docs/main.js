@@ -11,14 +11,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultContainer = document.getElementById('result');
   const resultsTableBody = document.querySelector('#resultsTable tbody');
   const tableContainer = document.getElementById('tableContainer');
+  convertBtn.addEventListener('click', () => {
+    const latInput = document.getElementById('latInput');
+    const lonInput = document.getElementById('lonInput');
+    const epsgSelect = document.getElementById('epsgSelect');
 
+    if (!latInput || !lonInput) {
+      alert('Campos de latitude e longitude não encontrados.');
+      return;
+    }
+
+    const lat = parseFloat(latInput.value);
+    const lon = parseFloat(lonInput.value);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      alert('Informe latitude e longitude válidas.');
+      return;
+    }
+
+    const epsg = epsgSelect ? epsgSelect.value : "EPSG:31982";
+
+    const utm = CoordUtils.geographicToUTM(lat, lon, epsg);
+    console.log('UTM:', utm);
+    const resultadoDiv = document.getElementById('resultado');
+resultadoDiv.innerHTML = `
+  <p><strong>UTM:</strong> Easting: ${utm.easting.toFixed(2)}, Northing: ${utm.northing.toFixed(2)}, Zone: ${utm.zone}S</p>
+`;
+  });
   const formatOptions = {
     dms: 'DMS (Degrees, Minutes, Seconds)',
     decimal: 'Decimal (DD)',
     utm: 'UTM (Universal Transverse Mercator)',
     all: 'All Formats'
   };
-
+  
   Object.entries(formatOptions).forEach(([val, label]) => {
     const inputOpt = new Option(label, val);
     const outputOpt = new Option(label, val);
