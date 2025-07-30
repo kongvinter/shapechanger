@@ -1,5 +1,6 @@
 // main.js - Coordinate Converter Logic
-
+let map;
+let marker;
 document.addEventListener('DOMContentLoaded', () => {
   const inputFormatSelect = document.getElementById('inputFormat');
   const outputFormatSelect = document.getElementById('outputFormat');
@@ -15,7 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const latInput = document.getElementById('latInput');
     const lonInput = document.getElementById('lonInput');
     const epsgSelect = document.getElementById('epsgSelect');
-
+  map = L.map('map').setView([-15.7801, -47.9292], 4); // Centro aproximado do Brasil
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
     if (!latInput || !lonInput) {
       alert('Campos de latitude e longitude não encontrados.');
       return;
@@ -123,7 +127,11 @@ resultadoDiv.innerHTML = `
         northing = utm.northing;
         zone = utm.zone;
       }
-
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lon]).addTo(map)
+    .bindPopup(`<b>Latitude:</b> ${lat.toFixed(5)}<br/><b>Longitude:</b> ${lon.toFixed(5)}`)
+    .openPopup();
+    map.setView([lat, lon], 14);
       const output = {
         area: '',
         point: '',
