@@ -1,11 +1,14 @@
 // main.js - Coordinate Converter Logic
 let map;
 let marker;
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Inicializar mapa
   map = L.map('map').setView([-15.7801, -47.9292], 4);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
+
   const inputFormatSelect = document.getElementById('inputFormat');
   const outputFormatSelect = document.getElementById('outputFormat');
   const fieldsContainer = document.getElementById('fieldsContainer');
@@ -16,35 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultContainer = document.getElementById('result');
   const resultsTableBody = document.querySelector('#resultsTable tbody');
   const tableContainer = document.getElementById('tableContainer');
- convertBtn.addEventListener('click', handleConvert);
-    const epsgSelect = document.getElementById('epsgSelect');
-    if (!latInput || !lonInput) {
-      alert('Campos de latitude e longitude não encontrados.');
-      return;
-    }
 
-    const lat = parseFloat(latInput.value);
-    const lon = parseFloat(lonInput.value);
-
-    if (isNaN(lat) || isNaN(lon)) {
-      alert('Informe latitude e longitude válidas.');
-      return;
-    }
-
-    const epsg = epsgSelect ? epsgSelect.value : "EPSG:31982";
-
-    const utm = CoordUtils.geographicToUTM(lat, lon, epsg);
-    console.log('UTM:', utm);
-  <p><strong>UTM:</strong> Easting: ${utm.easting.toFixed(2)}, Northing: ${utm.northing.toFixed(2)}, Zone: ${utm.zone}S</p>
-`;
-  });
+  // Formatos suportados
   const formatOptions = {
     dms: 'DMS (Degrees, Minutes, Seconds)',
     decimal: 'Decimal (DD)',
     utm: 'UTM (Universal Transverse Mercator)',
     all: 'All Formats'
   };
-  
+
   Object.entries(formatOptions).forEach(([val, label]) => {
     const inputOpt = new Option(label, val);
     const outputOpt = new Option(label, val);
@@ -123,11 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
         northing = utm.northing;
         zone = utm.zone;
       }
-    if (marker) map.removeLayer(marker);
-    marker = L.marker([lat, lon]).addTo(map)
-    .bindPopup(`<b>Latitude:</b> ${lat.toFixed(5)}<br/><b>Longitude:</b> ${lon.toFixed(5)}`)
-    .openPopup();
-    map.setView([lat, lon], 14);
+
+      // Atualizar mapa
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([lat, lon]).addTo(map)
+        .bindPopup(`<b>Latitude:</b> ${lat.toFixed(5)}<br/><b>Longitude:</b> ${lon.toFixed(5)}`)
+        .openPopup();
+      map.setView([lat, lon], 14);
+
       const output = {
         area: '',
         point: '',
@@ -172,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lines = input.split('\n');
     resultsTableBody.innerHTML = '';
 
-    lines.forEach((line, i) => {
+    lines.forEach((line) => {
       const parts = line.split(',').map(s => s.trim());
       let area = '', point = '', latStr, lonStr;
       if (parts.length === 2) {
@@ -213,5 +199,5 @@ document.addEventListener('DOMContentLoaded', () => {
     URL.revokeObjectURL(url);
   }
 
-  updateInputFields(); // initial call
+  updateInputFields(); // Chamar ao carregar
 });
