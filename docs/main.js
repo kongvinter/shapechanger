@@ -2,6 +2,10 @@
 let map;
 let marker;
 document.addEventListener('DOMContentLoaded', () => {
+  map = L.map('map').setView([-15.7801, -47.9292], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
   const inputFormatSelect = document.getElementById('inputFormat');
   const outputFormatSelect = document.getElementById('outputFormat');
   const fieldsContainer = document.getElementById('fieldsContainer');
@@ -12,14 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultContainer = document.getElementById('result');
   const resultsTableBody = document.querySelector('#resultsTable tbody');
   const tableContainer = document.getElementById('tableContainer');
-  convertBtn.addEventListener('click', () => {
-    const latInput = document.getElementById('latInput');
-    const lonInput = document.getElementById('lonInput');
+ convertBtn.addEventListener('click', handleConvert);
     const epsgSelect = document.getElementById('epsgSelect');
-  map = L.map('map').setView([-15.7801, -47.9292], 4); // Centro aproximado do Brasil
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
     if (!latInput || !lonInput) {
       alert('Campos de latitude e longitude não encontrados.');
       return;
@@ -37,8 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const utm = CoordUtils.geographicToUTM(lat, lon, epsg);
     console.log('UTM:', utm);
-    const resultadoDiv = document.getElementById('resultado');
-resultadoDiv.innerHTML = `
   <p><strong>UTM:</strong> Easting: ${utm.easting.toFixed(2)}, Northing: ${utm.northing.toFixed(2)}, Zone: ${utm.zone}S</p>
 `;
   });
