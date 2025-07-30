@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>shapechanger</title>
   <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
   <div class="container">
@@ -19,6 +23,12 @@
           <div class="form-group">
             <label for="inputFormat">Formato de Entrada:</label>
             <select id="inputFormat"></select>
+    </div>       
+          <!-- mapa -->
+           <div class="section">
+              <h2 class="section-title">Visualização no Mapa</h2>
+              <div id="map" style="height: 400px; border-radius: 8px;"></div>
+    </div>
           </div>
           <div id="fieldsContainer"></div>
         </div>
@@ -35,7 +45,6 @@
           <button id="addBtn" class="btn btn-secondary" hidden>Adicionar à Tabela</button>
         </div>
       </div>
-
       <div class="section bulk-input">
         <h2 class="section-title">Processamento em Lote</h2>
         <textarea id="bulkInput" rows="6" placeholder="Área,Ponto,Lat,Lon ou Lat,Lon (uma por linha)"></textarea>
